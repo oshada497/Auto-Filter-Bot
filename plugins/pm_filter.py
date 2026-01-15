@@ -146,7 +146,7 @@ async def next_page(bot, query):
             files_link += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file['_id']}>[{get_size(file['file_size'])}] {file['file_name']}</a></b>"""
     else:
         btn = [[
-            InlineKeyboardButton(text=f"{get_size(file['file_size'])} - {file['file_name']}", callback_data=f"file#{file['_id']}")
+            InlineKeyboardButton(text=f"{get_size(file['file_size'])} - " + re.sub(r'[^\x00-\x7F]+', '', file['file_name']).strip(), callback_data=f"file#{file['_id']}")
         ]
             for file in files
         ]
