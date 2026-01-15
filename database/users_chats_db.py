@@ -242,7 +242,10 @@ class Database:
         self.stg.update_one({'id': BOT_ID}, {'$set': {var: val}})
 
     def get_bot_sttgs(self):
-        return self.stg.find_one({'id': BOT_ID})
+        stg = self.stg.find_one({'id': BOT_ID})
+        if not stg:
+            return {}
+        return stg
 
 
 db = Database()
