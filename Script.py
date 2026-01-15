@@ -9,8 +9,8 @@ class script(object):
 ★ Language: <a href=https://www.python.org>Python</a>
 ★ Library: <a href=https://t.me/HydrogramNews>Hydrogram</a>"""
 
-    MY_OWNER_TXT = """★ Name: HA Bots
-★ Username: @HA_Bots
+    MY_OWNER_TXT = """★ Name: Sinhala Subs Project
+★ Username: @sinhalasubsproject
 ★ Country: Sri Lanka 🇱🇰"""
 
     STATUS_TXT = """👤 Total Users: <code>{}</code>
@@ -123,5 +123,5 @@ Support: {}"""
 
 - ꜱᴏᴜʀᴄᴇ - <a href=https://github.com/HA-Bots/Auto-Filter-Bot>ʜᴇʀᴇ</a>
 
-- ᴅᴇᴠʟᴏᴘᴇʀ - @HA_Bots"""
+- ᴅᴇᴠʟᴏᴘᴇʀ - @sinhalasubsproject"""
 
