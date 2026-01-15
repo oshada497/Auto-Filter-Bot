@@ -24,6 +24,11 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 uvloop.install()
+# Fix for Python 3.10+ where get_event_loop() raises if no loop exists
+try:
+    asyncio.get_event_loop()
+except RuntimeError:
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
 class Bot(Client):
     def __init__(self):
