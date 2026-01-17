@@ -7,7 +7,7 @@ from hydrogram.errors import ListenerTimeout
 from hydrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
 from Script import script
 from datetime import datetime, timedelta
-from info import IS_PREMIUM, PICS, TUTORIAL, SHORTLINK_API, SHORTLINK_URL, RECEIPT_SEND_USERNAME, UPI_ID, UPI_NAME, PRE_DAY_AMOUNT, SECOND_FILES_DATABASE_URL, ADMINS, URL, MAX_BTN, BIN_CHANNEL, IS_STREAM, DELETE_TIME, FILMS_LINK, LOG_CHANNEL, SUPPORT_GROUP, SUPPORT_LINK, UPDATES_LINK, LANGUAGES, QUALITY
+from info import IS_PREMIUM, PICS, TUTORIAL, SHORTLINK_API, SHORTLINK_URL, RECEIPT_SEND_USERNAME, UPI_ID, UPI_NAME, PRE_DAY_AMOUNT, SECOND_FILES_DATABASE_URL, ADMINS, URL, MAX_BTN, BIN_CHANNEL, IS_STREAM, DELETE_TIME, LOG_CHANNEL, SUPPORT_GROUP, SUPPORT_LINK, UPDATES_LINK, LANGUAGES, QUALITY
 from hydrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from hydrogram import Client, filters, enums
 from utils import is_premium, get_size, is_subscribed, is_check_admin, get_wish, get_shortlink, get_readable_time, get_poster, temp, get_settings, save_group_settings
@@ -25,19 +25,10 @@ async def pm_search(client, message):
     stg = db.get_bot_sttgs()
     if not stg.get('PM_SEARCH', True):
         return await message.reply_text('PM search was disabled!')
-    if await is_premium(message.from_user.id, client):
-        if not stg.get('AUTO_FILTER'):
-            return await message.reply_text('Auto filter was disabled!')
-        s = await message.reply(f"<b><i>⚠️ `{message.text}` searching...</i></b>", quote=True)
-        await auto_filter(client, message, s)
-    else:
-        files, n_offset, total = await get_search_results(message.text)
-        btn = [[
-            InlineKeyboardButton("🗂 ᴄʟɪᴄᴋ ʜᴇʀᴇ 🗂", url=FILMS_LINK)
-        ]]
-        reply_markup=InlineKeyboardMarkup(btn)
-        if int(total) != 0:
-            await message.reply_text(f'<b><i>🤗 ᴛᴏᴛᴀʟ <code>{total}</code> ʀᴇꜱᴜʟᴛꜱ ꜰᴏᴜɴᴅ ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ 👇</i></b>', reply_markup=reply_markup)
+    if not stg.get('AUTO_FILTER'):
+        return await message.reply_text('Auto filter was disabled!')
+    s = await message.reply(f"<b><i>⚠️ `{message.text}` searching...</i></b>", quote=True)
+    await auto_filter(client, message, s)
 
             
 
