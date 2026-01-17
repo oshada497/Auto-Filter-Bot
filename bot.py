@@ -67,6 +67,15 @@ class Bot(Client):
         await web.TCPSite(app, "0.0.0.0", PORT).start()
 
         asyncio.create_task(check_premium(self))
+        
+        # Start auto-scraper for subtitle websites
+        try:
+            from plugins.auto_scraper import start_auto_scraper
+            asyncio.create_task(start_auto_scraper(self))
+            logger.info("Auto-scraper started for subz.lk, zoom.lk, biscope.lk")
+        except Exception as e:
+            logger.error(f"Failed to start auto-scraper: {e}")
+        
         try:
             await self.send_message(chat_id=LOG_CHANNEL, text=f"<b>{me.mention} Restarted! 🤖</b>")
         except:

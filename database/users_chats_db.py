@@ -52,6 +52,7 @@ class Database:
         self.req = data_db.Requests
         self.con = data_db.Connections
         self.stg = data_db.Settings
+        self.scraped = data_db.ScrapedUrls  # For auto-scraper tracking
 
     def new_user(self, id, name):
         return dict(
@@ -246,6 +247,31 @@ class Database:
         if not stg:
             return {}
         return stg
+
+    # ============== SCRAPER METHODS ==============
+    def is_scraped_url(self, url: str) -> bool:
+        """Check if URL has been scraped"""
+        return bool(self.scraped.find_one({'url': url}))
+    
+    def add_scraped_url(self, url: str, title: str):
+        """Add URL to scraped collection"""
+        self.scraped.update_one(
+            {'url': url},
+            {'$set': {
+                'url': url,
+                'title': title,
+                'scraped_at': datetime.now()
+            }},
+            upsert=True
+        )
+    
+    def get_scraped_count(self) -> int:
+        """Get total count of scraped URLs"""
+        return self.scraped.count_documents({})
+    
+    def clear_scraped_urls(self):
+        """Clear all scraped URLs (for reset)"""
+        return self.scraped.delete_many({})
 
 
 db = Database()

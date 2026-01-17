@@ -11,3 +11,5 @@ requests
 qrcode
 Pillow
 pytz
+beautifulsoup4
+lxml
