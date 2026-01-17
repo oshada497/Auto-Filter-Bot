@@ -86,32 +86,45 @@ class SubtitleScraper:
         try:
             async with self.session.get('https://subz.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status != 200:
+                    logger.warning(f"subz.lk returned status {response.status}")
                     return subtitles
                 
                 html = await response.text()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # Find subtitle entries - adjust selectors based on actual site structure
-                for item in soup.select('.post-item, .subtitle-item, article')[:MAX_SUBS_PER_RUN]:
-                    try:
-                        link = item.find('a', href=True)
-                        if not link:
+                # Find all links that contain "sinhala-subtitle" in the URL
+                for link in soup.find_all('a', href=True):
+                    href = link.get('href', '')
+                    
+                    # Filter subtitle pages - they contain "sinhala-subtitle" in URL
+                    if 'subz.lk/' in href and 'sinhala-subtitle' in href.lower():
+                        url = href if href.startswith('http') else f'https://subz.lk{href}'
+                        
+                        # Get title from link text
+                        title = link.get_text(strip=True)
+                        if not title or len(title) < 3:
                             continue
                         
-                        url = link.get('href', '')
-                        if not url.startswith('http'):
-                            url = 'https://subz.lk' + url
-                        
-                        title = link.get_text(strip=True) or item.get_text(strip=True)[:100]
+                        # Skip navigation/category links
+                        if title.lower() in ['see more', 'movies', 'tv shows', 'category']:
+                            continue
                         
                         if url and not self.is_processed(url):
                             subtitles.append({
                                 'url': url,
-                                'title': title,
+                                'title': title[:100],
                                 'source': 'subz.lk'
                             })
-                    except Exception as e:
-                        logger.debug(f"Error parsing subz.lk item: {e}")
+                
+                # Remove duplicates
+                seen = set()
+                unique_subtitles = []
+                for sub in subtitles:
+                    if sub['url'] not in seen:
+                        seen.add(sub['url'])
+                        unique_subtitles.append(sub)
+                
+                return unique_subtitles[:MAX_SUBS_PER_RUN]
                         
         except Exception as e:
             logger.error(f"Error scraping subz.lk: {e}")
@@ -125,78 +138,104 @@ class SubtitleScraper:
         subtitles = []
         
         try:
-            async with self.session.get('https://zoom.lk/subtitles/', timeout=aiohttp.ClientTimeout(total=30)) as response:
+            async with self.session.get('https://zoom.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status != 200:
+                    logger.warning(f"zoom.lk returned status {response.status}")
                     return subtitles
                 
                 html = await response.text()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # Find subtitle entries
-                for item in soup.select('.post, .entry, article, .subtitle-entry')[:MAX_SUBS_PER_RUN]:
-                    try:
-                        link = item.find('a', href=True)
-                        if not link:
+                # Find all links that contain subtitle info
+                for link in soup.find_all('a', href=True):
+                    href = link.get('href', '')
+                    
+                    # Filter subtitle pages
+                    if 'zoom.lk/' in href and ('sinhala-subtitle' in href.lower() or 'subtitle' in href.lower()):
+                        url = href if href.startswith('http') else f'https://zoom.lk{href}'
+                        
+                        # Get title from link text
+                        title = link.get_text(strip=True)
+                        if not title or len(title) < 3:
                             continue
                         
-                        url = link.get('href', '')
-                        if not url.startswith('http'):
-                            url = 'https://zoom.lk' + url
-                        
-                        title = link.get_text(strip=True) or item.get_text(strip=True)[:100]
-                        
-                        if url and 'subtitle' in url.lower() and not self.is_processed(url):
+                        if url and not self.is_processed(url):
                             subtitles.append({
                                 'url': url,
-                                'title': title,
+                                'title': title[:100],
                                 'source': 'zoom.lk'
                             })
-                    except Exception as e:
-                        logger.debug(f"Error parsing zoom.lk item: {e}")
+                
+                # Remove duplicates
+                seen = set()
+                unique_subtitles = []
+                for sub in subtitles:
+                    if sub['url'] not in seen:
+                        seen.add(sub['url'])
+                        unique_subtitles.append(sub)
+                
+                return unique_subtitles[:MAX_SUBS_PER_RUN]
                         
         except Exception as e:
             logger.error(f"Error scraping zoom.lk: {e}")
         
         return subtitles
     
-    # ============== BISCOPE.LK SCRAPER ==============
-    async def scrape_biscope_lk(self) -> list:
-        """Scrape latest subtitles from biscope.lk"""
+    # ============== BAISCOPE.LK SCRAPER ==============
+    async def scrape_baiscope_lk(self) -> list:
+        """Scrape latest subtitles from baiscope.lk"""
         await self.init_session()
         subtitles = []
         
         try:
-            async with self.session.get('https://biscope.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
+            async with self.session.get('https://www.baiscope.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status != 200:
+                    logger.warning(f"baiscope.lk returned status {response.status}")
                     return subtitles
                 
                 html = await response.text()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # Find subtitle entries
-                for item in soup.select('.post, .entry, article, .movie-item')[:MAX_SUBS_PER_RUN]:
-                    try:
-                        link = item.find('a', href=True)
-                        if not link:
+                # Find all links that contain subtitle info
+                for link in soup.find_all('a', href=True):
+                    href = link.get('href', '')
+                    
+                    # Filter subtitle pages - baiscope uses "sinhala-subtitles" in URL
+                    if 'baiscope.lk/' in href and ('sinhala-subtitle' in href.lower() or 'subtitles' in href.lower()):
+                        url = href if href.startswith('http') else f'https://www.baiscope.lk{href}'
+                        
+                        # Skip category pages
+                        if '/category/' in url:
                             continue
                         
-                        url = link.get('href', '')
-                        if not url.startswith('http'):
-                            url = 'https://biscope.lk' + url
+                        # Get title from link text
+                        title = link.get_text(strip=True)
+                        if not title or len(title) < 3:
+                            continue
                         
-                        title = link.get_text(strip=True) or item.get_text(strip=True)[:100]
+                        # Skip navigation links
+                        if 'ලබාගන්න' in title or 'සියලුම' in title:
+                            continue
                         
                         if url and not self.is_processed(url):
                             subtitles.append({
                                 'url': url,
-                                'title': title,
-                                'source': 'biscope.lk'
+                                'title': title[:100],
+                                'source': 'baiscope.lk'
                             })
-                    except Exception as e:
-                        logger.debug(f"Error parsing biscope.lk item: {e}")
+                
+                # Remove duplicates
+                seen = set()
+                unique_subtitles = []
+                for sub in subtitles:
+                    if sub['url'] not in seen:
+                        seen.add(sub['url'])
+                        unique_subtitles.append(sub)
+                
+                return unique_subtitles[:MAX_SUBS_PER_RUN]
                         
         except Exception as e:
-            logger.error(f"Error scraping biscope.lk: {e}")
+            logger.error(f"Error scraping baiscope.lk: {e}")
         
         return subtitles
 
@@ -212,13 +251,25 @@ class SubtitleScraper:
                 html = await response.text()
                 soup = BeautifulSoup(html, 'html.parser')
                 
-                # Look for download links
                 download_link = None
                 filename = None
                 
-                # Common download button patterns
-                for selector in ['a[href*="download"]', 'a[href*=".srt"]', 'a[href*=".zip"]', 
-                                '.download-btn', '.btn-download', 'a.download']:
+                # Common download button patterns for these sites
+                download_selectors = [
+                    'a[href*=".srt"]',
+                    'a[href*=".zip"]', 
+                    'a[href*=".rar"]',
+                    'a[href*="download"]',
+                    'a[href*="drive.google"]',
+                    'a[href*="mediafire"]',
+                    'a[href*="mega.nz"]',
+                    '.download-link a',
+                    '.btn-download',
+                    'a.download',
+                    'a[download]'
+                ]
+                
+                for selector in download_selectors:
                     link = soup.select_one(selector)
                     if link and link.get('href'):
                         download_link = link.get('href')
@@ -227,12 +278,22 @@ class SubtitleScraper:
                             download_link = base_url + download_link
                         break
                 
-                # Extract filename from title or link
+                # Extract filename from title
                 title_tag = soup.find('h1') or soup.find('title')
                 if title_tag:
                     title = title_tag.get_text(strip=True)
-                    # Clean filename
-                    filename = re.sub(r'[^\w\s\-\.]', '', title)[:80] + '.srt'
+                    # Clean filename - keep only alphanumeric, spaces, and basic punctuation
+                    filename = re.sub(r'[^\w\s\-\.\(\)]', '', title)[:80]
+                    # Add extension based on download link
+                    if download_link:
+                        if '.zip' in download_link.lower():
+                            filename += '.zip'
+                        elif '.rar' in download_link.lower():
+                            filename += '.rar'
+                        else:
+                            filename += '.srt'
+                    else:
+                        filename += '.srt'
                 else:
                     filename = f"subtitle_{datetime.now().strftime('%Y%m%d%H%M%S')}.srt"
                 
@@ -298,11 +359,11 @@ class SubtitleScraper:
             logger.error(f"zoom.lk scrape failed: {e}")
         
         try:
-            biscope_subs = await self.scrape_biscope_lk()
-            all_subtitles.extend(biscope_subs)
-            logger.info(f"Found {len(biscope_subs)} new subtitles from biscope.lk")
+            baiscope_subs = await self.scrape_baiscope_lk()
+            all_subtitles.extend(baiscope_subs)
+            logger.info(f"Found {len(baiscope_subs)} new subtitles from baiscope.lk")
         except Exception as e:
-            logger.error(f"biscope.lk scrape failed: {e}")
+            logger.error(f"baiscope.lk scrape failed: {e}")
         
         # Process found subtitles
         processed = 0
@@ -365,7 +426,11 @@ async def scrape_status(client: Client, message: Message):
     await message.reply(f"📊 **Scraper Status**\n\n"
                        f"📁 Total URLs processed: {total_scraped}\n"
                        f"⏱ Scrape interval: {SCRAPE_INTERVAL // 60} minutes\n"
-                       f"🔢 Max subs per run: {MAX_SUBS_PER_RUN}")
+                       f"🔢 Max subs per run: {MAX_SUBS_PER_RUN}\n\n"
+                       f"🌐 Sources:\n"
+                       f"• subz.lk\n"
+                       f"• zoom.lk\n"
+                       f"• baiscope.lk")
 
 
 @Client.on_message(filters.command('seed_scraper') & filters.user(ADMINS))
@@ -393,58 +458,50 @@ async def seed_scraper(client: Client, message: Message):
                 if response.status == 200:
                     html = await response.text()
                     soup = BeautifulSoup(html, 'html.parser')
-                    for item in soup.select('.post-item, .subtitle-item, article, a[href]'):
-                        link = item if item.name == 'a' else item.find('a', href=True)
-                        if link and link.get('href'):
-                            url = link.get('href', '')
-                            if not url.startswith('http'):
-                                url = 'https://subz.lk' + url
-                            if url and 'subz.lk' in url:
-                                title = link.get_text(strip=True)[:100] or 'Unknown'
-                                db.add_scraped_url(url, f"[SEEDED] {title}")
-                                seeded_count += 1
+                    for link in soup.find_all('a', href=True):
+                        href = link.get('href', '')
+                        if 'subz.lk/' in href and 'sinhala-subtitle' in href.lower():
+                            url = href if href.startswith('http') else f'https://subz.lk{href}'
+                            title = link.get_text(strip=True)[:100] or 'Unknown'
+                            db.add_scraped_url(url, f"[SEEDED] {title}")
+                            seeded_count += 1
         except Exception as e:
             logger.error(f"Error seeding subz.lk: {e}")
         
         # Seed zoom.lk
         await msg.edit(f"🌱 Seeding zoom.lk... ({seeded_count} done)")
         try:
-            async with scraper.session.get('https://zoom.lk/subtitles/', timeout=aiohttp.ClientTimeout(total=30)) as response:
+            async with scraper.session.get('https://zoom.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status == 200:
                     html = await response.text()
                     soup = BeautifulSoup(html, 'html.parser')
-                    for item in soup.select('.post, .entry, article, a[href]'):
-                        link = item if item.name == 'a' else item.find('a', href=True)
-                        if link and link.get('href'):
-                            url = link.get('href', '')
-                            if not url.startswith('http'):
-                                url = 'https://zoom.lk' + url
-                            if url and 'zoom.lk' in url:
-                                title = link.get_text(strip=True)[:100] or 'Unknown'
-                                db.add_scraped_url(url, f"[SEEDED] {title}")
-                                seeded_count += 1
+                    for link in soup.find_all('a', href=True):
+                        href = link.get('href', '')
+                        if 'zoom.lk/' in href and ('sinhala-subtitle' in href.lower() or 'subtitle' in href.lower()):
+                            url = href if href.startswith('http') else f'https://zoom.lk{href}'
+                            title = link.get_text(strip=True)[:100] or 'Unknown'
+                            db.add_scraped_url(url, f"[SEEDED] {title}")
+                            seeded_count += 1
         except Exception as e:
             logger.error(f"Error seeding zoom.lk: {e}")
         
-        # Seed biscope.lk  
-        await msg.edit(f"🌱 Seeding biscope.lk... ({seeded_count} done)")
+        # Seed baiscope.lk  
+        await msg.edit(f"🌱 Seeding baiscope.lk... ({seeded_count} done)")
         try:
-            async with scraper.session.get('https://biscope.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
+            async with scraper.session.get('https://www.baiscope.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status == 200:
                     html = await response.text()
                     soup = BeautifulSoup(html, 'html.parser')
-                    for item in soup.select('.post, .entry, article, .movie-item, a[href]'):
-                        link = item if item.name == 'a' else item.find('a', href=True)
-                        if link and link.get('href'):
-                            url = link.get('href', '')
-                            if not url.startswith('http'):
-                                url = 'https://biscope.lk' + url
-                            if url and 'biscope.lk' in url:
+                    for link in soup.find_all('a', href=True):
+                        href = link.get('href', '')
+                        if 'baiscope.lk/' in href and ('sinhala-subtitle' in href.lower() or 'subtitles' in href.lower()):
+                            if '/category/' not in href:
+                                url = href if href.startswith('http') else f'https://www.baiscope.lk{href}'
                                 title = link.get_text(strip=True)[:100] or 'Unknown'
                                 db.add_scraped_url(url, f"[SEEDED] {title}")
                                 seeded_count += 1
         except Exception as e:
-            logger.error(f"Error seeding biscope.lk: {e}")
+            logger.error(f"Error seeding baiscope.lk: {e}")
         
         await scraper.close_session()
         
@@ -472,4 +529,3 @@ async def reset_scraper(client: Client, message: Message):
     await message.reply(f"🗑 **Scraper database reset!**\n\n"
                        f"Deleted {result.deleted_count} processed URLs.\n"
                        f"Run `/seed_scraper` to mark existing URLs before scraping.")
-
