@@ -34,12 +34,10 @@ async def pm_search(client, message):
         files, n_offset, total = await get_search_results(message.text)
         btn = [[
             InlineKeyboardButton("🗂 ᴄʟɪᴄᴋ ʜᴇʀᴇ 🗂", url=FILMS_LINK)
-        ],[
-            InlineKeyboardButton('🤑 Buy Premium', url=f"https://t.me/{temp.U_NAME}?start=premium")
-            ]]
+        ]]
         reply_markup=InlineKeyboardMarkup(btn)
         if int(total) != 0:
-            await message.reply_text(f'<b><i>🤗 ᴛᴏᴛᴀʟ <code>{total}</code> ʀᴇꜱᴜʟᴛꜱ ꜰᴏᴜɴᴅ ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ 👇</i></b>\n\nor buy premium subscription', reply_markup=reply_markup)
+            await message.reply_text(f'<b><i>🤗 ᴛᴏᴛᴀʟ <code>{total}</code> ʀᴇꜱᴜʟᴛꜱ ꜰᴏᴜɴᴅ ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ 👇</i></b>', reply_markup=reply_markup)
 
             
 
@@ -52,15 +50,6 @@ async def group_search(client, message):
         if not user_id:
             await message.reply("I'm not working for anonymous admin!")
             return
-        if message.chat.id == SUPPORT_GROUP:
-            files, offset, total = await get_search_results(message.text)
-            if files:
-                btn = [[
-                    InlineKeyboardButton("Here", url=FILMS_LINK)
-                ]]
-                await message.reply_text(f'Total {total} results found in this group', reply_markup=InlineKeyboardMarkup(btn))
-            return
-            
         if message.text.startswith("/"):
             return
             
@@ -600,8 +589,6 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('👨‍🚒 ʜᴇʟᴘ', callback_data='help'),
             InlineKeyboardButton('🔎 ɪɴʟɪɴᴇ', switch_inline_query_current_chat=''),
             InlineKeyboardButton('📚 ᴀʙᴏᴜᴛ', callback_data='about')
-        ],[
-            InlineKeyboardButton('🤑 Buy Premium', url=f"https://t.me/{temp.U_NAME}?start=premium")
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.edit_message_media(
