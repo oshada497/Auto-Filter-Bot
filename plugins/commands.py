@@ -12,7 +12,7 @@ from database.ia_filterdb import db_count_documents, second_db_count_documents, 
 from database.users_chats_db import db
 from datetime import datetime, timedelta
 from info import IS_PREMIUM, PRE_DAY_AMOUNT, RECEIPT_SEND_USERNAME, URL, BIN_CHANNEL, SECOND_FILES_DATABASE_URL, STICKERS, INDEX_CHANNELS, ADMINS, IS_VERIFY, VERIFY_TUTORIAL, VERIFY_EXPIRE, SHORTLINK_API, SHORTLINK_URL, DELETE_TIME, SUPPORT_LINK, UPDATES_LINK, LOG_CHANNEL, PICS, IS_STREAM, REACTIONS, PM_FILE_DELETE_TIME
-from utils import is_premium, upload_image, get_settings, get_size, is_subscribed, is_check_admin, get_shortlink, get_verify_status, update_verify_status, save_group_settings, temp, get_readable_time, get_wish, get_seconds
+from utils import is_premium, upload_image, get_settings, get_size, is_subscribed, is_check_admin, get_shortlink, get_verify_status, update_verify_status, save_group_settings, temp, get_readable_time, get_wish, get_seconds, clean_ascii
 
 async def del_stk(s):
     await asyncio.sleep(3)
@@ -151,9 +151,9 @@ async def start(client, message):
         for file in files:
             CAPTION = settings['caption']
             f_caption = CAPTION.format(
-                file_name=file['file_name'],
+                file_name=clean_ascii(file['file_name']),
                 file_size=get_size(file['file_size']),
-                file_caption=file['caption']
+                file_caption=clean_ascii(file['caption']) if file['caption'] else ''
             )      
             btn = [[
                 InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),
@@ -191,9 +191,9 @@ async def start(client, message):
             
     CAPTION = settings['caption']
     f_caption = CAPTION.format(
-        file_name = files['file_name'],
+        file_name = clean_ascii(files['file_name']),
         file_size = get_size(files['file_size']),
-        file_caption=files['caption']
+        file_caption=clean_ascii(files['caption']) if files['caption'] else ''
     )
     btn = [[
         InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),

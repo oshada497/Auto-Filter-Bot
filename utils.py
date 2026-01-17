@@ -269,6 +269,16 @@ def list_to_str(k):
         return str(k[0])
     else:
         return ', '.join(f'{elem}' for elem in k)
+
+def clean_ascii(text):
+    """Remove non-ASCII characters (Sinhala, etc.) and keep only English characters"""
+    if not text:
+        return text
+    # Keep only ASCII printable characters (English letters, numbers, punctuation)
+    cleaned = re.sub(r'[^\x00-\x7F]+', '', str(text))
+    # Clean up multiple spaces and trim
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned if cleaned else text
     
 async def get_shortlink(url, api, link):
     shortzy = Shortzy(api_key=api, base_site=url)

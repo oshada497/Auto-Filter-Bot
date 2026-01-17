@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from info import IS_PREMIUM, PICS, TUTORIAL, SHORTLINK_API, SHORTLINK_URL, RECEIPT_SEND_USERNAME, UPI_ID, UPI_NAME, PRE_DAY_AMOUNT, SECOND_FILES_DATABASE_URL, ADMINS, URL, MAX_BTN, BIN_CHANNEL, IS_STREAM, DELETE_TIME, LOG_CHANNEL, SUPPORT_GROUP, SUPPORT_LINK, UPDATES_LINK, LANGUAGES, QUALITY
 from hydrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from hydrogram import Client, filters, enums
-from utils import is_premium, get_size, is_subscribed, is_check_admin, get_wish, get_shortlink, get_readable_time, get_poster, temp, get_settings, save_group_settings
+from utils import is_premium, get_size, is_subscribed, is_check_admin, get_wish, get_shortlink, get_readable_time, get_poster, temp, get_settings, save_group_settings, clean_ascii
 from database.users_chats_db import db
 from database.ia_filterdb import get_search_results,delete_files, db_count_documents, second_db_count_documents
 from plugins.commands import get_grp_stg
@@ -123,10 +123,10 @@ async def next_page(bot, query):
     if settings['links']:
         btn = []
         for file_num, file in enumerate(files, start=offset+1):
-            files_link += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file['_id']}>[{get_size(file['file_size'])}] {file['file_name']}</a></b>"""
+            files_link += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file['_id']}>[{get_size(file['file_size'])}] {clean_ascii(file['file_name'])}</a></b>"""
     else:
         btn = [[
-            InlineKeyboardButton(text=f"{get_size(file['file_size'])} - " + re.sub(r'[^\x00-\x7F]+', '', file['file_name']).strip(), callback_data=f"file#{file['_id']}")
+            InlineKeyboardButton(text=f"{get_size(file['file_size'])} - " + clean_ascii(file['file_name']), callback_data=f"file#{file['_id']}")
         ]
             for file in files
         ]
@@ -770,10 +770,10 @@ async def auto_filter(client, msg, s, spoll=False):
     if settings['links']:
         btn = []
         for file_num, file in enumerate(files, start=1):
-            files_link += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{message.chat.id}_{file['_id']}>[{get_size(file['file_size'])}] {file['file_name']}</a></b>"""
+            files_link += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{message.chat.id}_{file['_id']}>[{get_size(file['file_size'])}] {clean_ascii(file['file_name'])}</a></b>"""
     else:
         btn = [[
-            InlineKeyboardButton(text=f"{get_size(file['file_size'])} - " + re.sub(r'[^\x00-\x7F]+', '', file['file_name']).strip(), callback_data=f'file#{file["_id"]}')
+            InlineKeyboardButton(text=f"{get_size(file['file_size'])} - " + clean_ascii(file['file_name']), callback_data=f'file#{file["_id"]}')
         ]
             for file in files
         ]   
@@ -800,7 +800,13 @@ async def auto_filter(client, msg, s, spoll=False):
                 [InlineKeyboardButton("♻️ sᴇɴᴅ ᴀʟʟ ♻️", callback_data=f"send_all#{key}#{req}")]
             )
 
-    imdb = await get_poster(search, file=(files[0])['file_name']) if settings["imdb"] else None
+    imdb = None
+    if settings["imdb"]:
+        try:
+            imdb = await get_poster(search, file=(files[0])['file_name'])
+        except Exception as e:
+            print(f"IMDB lookup failed: {e}")
+            imdb = None
     TEMPLATE = settings['template']
     if imdb:
         cap = TEMPLATE.format(
