@@ -72,6 +72,12 @@ def upload_image(file_path):
 
 
 async def get_poster(query, bulk=False, id=False, file=None):
+    import asyncio
+    from concurrent.futures import ThreadPoolExecutor
+    
+    loop = asyncio.get_event_loop()
+    executor = ThreadPoolExecutor(max_workers=1)
+    
     if not id:
         query = (query.strip()).lower()
         title = query
@@ -85,8 +91,16 @@ async def get_poster(query, bulk=False, id=False, file=None):
                 year = list_to_str(year[:1]) 
         else:
             year = None
-        movieid = imdb.search_movie(title.lower(), results=10)
+        
+        # Run blocking IMDB search in thread executor
+        try:
+            movieid = await loop.run_in_executor(executor, lambda: imdb.search_movie(title.lower(), results=10))
+        except Exception as e:
+            print(f"IMDB search_movie failed: {e}")
+            return None
+            
         if not movieid:
+            print(f"IMDB search returned no results for: {title}")
             return None
         if year:
             filtered=list(filter(lambda k: str(k.get('year')) == str(year), movieid))
@@ -102,7 +116,14 @@ async def get_poster(query, bulk=False, id=False, file=None):
         movieid = movieid[0].movieID
     else:
         movieid = query
-    movie = imdb.get_movie(movieid)
+    
+    # Run blocking IMDB get_movie in thread executor
+    try:
+        movie = await loop.run_in_executor(executor, lambda: imdb.get_movie(movieid))
+    except Exception as e:
+        print(f"IMDB get_movie failed: {e}")
+        return None
+        
     if movie.get("original air date"):
         date = movie["original air date"]
     elif movie.get("year"):
@@ -118,6 +139,10 @@ async def get_poster(query, bulk=False, id=False, file=None):
         plot = movie.get('plot outline')
     if plot and len(plot) > 800:
         plot = plot[0:800] + "..."
+    
+    poster = movie.get('full-size cover url')
+    print(f"IMDB found: {movie.get('title')}, poster: {poster[:50] if poster else 'None'}...")
+    
     return {
         'title': movie.get('title'),
         'votes': movie.get('votes'),
@@ -142,7 +167,7 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'release_date': date,
         'year': movie.get('year'),
         'genres': list_to_str(movie.get("genres")),
-        'poster': movie.get('full-size cover url'),
+        'poster': poster,
         'plot': plot,
         'rating': str(movie.get("rating")),
         'url':f'https://www.imdb.com/title/tt{movieid}'
