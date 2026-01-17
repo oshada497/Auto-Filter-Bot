@@ -366,3 +366,110 @@ async def scrape_status(client: Client, message: Message):
                        f"📁 Total URLs processed: {total_scraped}\n"
                        f"⏱ Scrape interval: {SCRAPE_INTERVAL // 60} minutes\n"
                        f"🔢 Max subs per run: {MAX_SUBS_PER_RUN}")
+
+
+@Client.on_message(filters.command('seed_scraper') & filters.user(ADMINS))
+async def seed_scraper(client: Client, message: Message):
+    """
+    Seed the scraper database by marking all EXISTING subtitles as processed.
+    This prevents downloading old subtitles - only NEW ones will be downloaded.
+    Run this ONCE before starting regular scraping.
+    """
+    global scraper
+    
+    msg = await message.reply("🌱 **Seeding scraper database...**\n\nThis will mark all existing subtitles as 'processed' WITHOUT downloading them.\nOnly truly NEW subtitles will be downloaded in the future.")
+    
+    if not scraper:
+        scraper = SubtitleScraper(client)
+    
+    await scraper.init_session()
+    seeded_count = 0
+    
+    try:
+        # Seed subz.lk
+        await msg.edit("🌱 Seeding subz.lk...")
+        try:
+            async with scraper.session.get('https://subz.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
+                if response.status == 200:
+                    html = await response.text()
+                    soup = BeautifulSoup(html, 'html.parser')
+                    for item in soup.select('.post-item, .subtitle-item, article, a[href]'):
+                        link = item if item.name == 'a' else item.find('a', href=True)
+                        if link and link.get('href'):
+                            url = link.get('href', '')
+                            if not url.startswith('http'):
+                                url = 'https://subz.lk' + url
+                            if url and 'subz.lk' in url:
+                                title = link.get_text(strip=True)[:100] or 'Unknown'
+                                db.add_scraped_url(url, f"[SEEDED] {title}")
+                                seeded_count += 1
+        except Exception as e:
+            logger.error(f"Error seeding subz.lk: {e}")
+        
+        # Seed zoom.lk
+        await msg.edit(f"🌱 Seeding zoom.lk... ({seeded_count} done)")
+        try:
+            async with scraper.session.get('https://zoom.lk/subtitles/', timeout=aiohttp.ClientTimeout(total=30)) as response:
+                if response.status == 200:
+                    html = await response.text()
+                    soup = BeautifulSoup(html, 'html.parser')
+                    for item in soup.select('.post, .entry, article, a[href]'):
+                        link = item if item.name == 'a' else item.find('a', href=True)
+                        if link and link.get('href'):
+                            url = link.get('href', '')
+                            if not url.startswith('http'):
+                                url = 'https://zoom.lk' + url
+                            if url and 'zoom.lk' in url:
+                                title = link.get_text(strip=True)[:100] or 'Unknown'
+                                db.add_scraped_url(url, f"[SEEDED] {title}")
+                                seeded_count += 1
+        except Exception as e:
+            logger.error(f"Error seeding zoom.lk: {e}")
+        
+        # Seed biscope.lk  
+        await msg.edit(f"🌱 Seeding biscope.lk... ({seeded_count} done)")
+        try:
+            async with scraper.session.get('https://biscope.lk/', timeout=aiohttp.ClientTimeout(total=30)) as response:
+                if response.status == 200:
+                    html = await response.text()
+                    soup = BeautifulSoup(html, 'html.parser')
+                    for item in soup.select('.post, .entry, article, .movie-item, a[href]'):
+                        link = item if item.name == 'a' else item.find('a', href=True)
+                        if link and link.get('href'):
+                            url = link.get('href', '')
+                            if not url.startswith('http'):
+                                url = 'https://biscope.lk' + url
+                            if url and 'biscope.lk' in url:
+                                title = link.get_text(strip=True)[:100] or 'Unknown'
+                                db.add_scraped_url(url, f"[SEEDED] {title}")
+                                seeded_count += 1
+        except Exception as e:
+            logger.error(f"Error seeding biscope.lk: {e}")
+        
+        await scraper.close_session()
+        
+        await msg.edit(f"✅ **Seeding complete!**\n\n"
+                      f"📁 Marked {seeded_count} URLs as processed\n"
+                      f"🆕 Only NEW subtitles will be downloaded now\n\n"
+                      f"Total in database: {db.get_scraped_count()}")
+        
+    except Exception as e:
+        await msg.edit(f"❌ Seeding failed: {e}")
+
+
+@Client.on_message(filters.command('reset_scraper') & filters.user(ADMINS))
+async def reset_scraper(client: Client, message: Message):
+    """Reset the scraper database - clears all processed URLs"""
+    if len(message.command) < 2 or message.command[1] != 'confirm':
+        return await message.reply(
+            "⚠️ **Warning!**\n\n"
+            "This will clear ALL processed URLs from the database.\n"
+            "The scraper will treat ALL subtitles as new and try to download them!\n\n"
+            "To confirm, use: `/reset_scraper confirm`"
+        )
+    
+    result = db.clear_scraped_urls()
+    await message.reply(f"🗑 **Scraper database reset!**\n\n"
+                       f"Deleted {result.deleted_count} processed URLs.\n"
+                       f"Run `/seed_scraper` to mark existing URLs before scraping.")
+
