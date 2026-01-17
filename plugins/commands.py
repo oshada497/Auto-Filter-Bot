@@ -32,7 +32,7 @@ async def start(client, message):
             InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs ᴄʜᴀɴɴᴇʟ ⚡️', url=UPDATES_LINK),
             InlineKeyboardButton('💡 sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ 💡', url=SUPPORT_LINK)
         ]]
-        await message.reply(text=f"<b>ʜᴇʏ {user}, <i>{wish}</i>\nʜᴏᴡ ᴄᴀɴ ɪ ʜᴇʟᴘ ʏᴏᴜ??</b>", reply_markup=InlineKeyboardMarkup(btn))
+        await message.reply(text=f"<b>ʜᴇʏ {user}, <i>{wish}</i>\nWelcome to Subtitle Finder Bot! How can I help you today?</b>", reply_markup=InlineKeyboardMarkup(btn))
         return 
         
     try:
@@ -155,22 +155,12 @@ async def start(client, message):
                 file_size=get_size(file['file_size']),
                 file_caption=file['caption']
             )      
-            if IS_STREAM:
-                btn = [[
-                    InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f"stream#{file['_id']}")
-                ],[
-                    InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),
-                    InlineKeyboardButton('💡 ꜱᴜᴘᴘᴏʀᴛ', url=SUPPORT_LINK)
-                ],[
-                    InlineKeyboardButton('⁉️ ᴄʟᴏsᴇ ⁉️', callback_data='close_data')
-                ]]
-            else:
-                btn = [[
-                    InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),
-                    InlineKeyboardButton('💡 ꜱᴜᴘᴘᴏʀᴛ', url=SUPPORT_LINK)
-                ],[
-                    InlineKeyboardButton('⁉️ ᴄʟᴏsᴇ ⁉️', callback_data='close_data')
-                ]]
+            btn = [[
+                InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),
+                InlineKeyboardButton('💡 ꜱᴜᴘᴘᴏʀᴛ', url=SUPPORT_LINK)
+            ],[
+                InlineKeyboardButton('⁉️ ᴄʟᴏsᴇ ⁉️', callback_data='close_data')
+            ]]
 
             msg = await client.send_cached_media(
                 chat_id=message.from_user.id,
@@ -205,22 +195,12 @@ async def start(client, message):
         file_size = get_size(files['file_size']),
         file_caption=files['caption']
     )
-    if IS_STREAM:
-        btn = [[
-            InlineKeyboardButton("✛ ᴡᴀᴛᴄʜ & ᴅᴏᴡɴʟᴏᴀᴅ ✛", callback_data=f"stream#{file_id}")
-        ],[
-            InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),
-            InlineKeyboardButton('💡 ꜱᴜᴘᴘᴏʀᴛ', url=SUPPORT_LINK)
-        ],[
-            InlineKeyboardButton('⁉️ ᴄʟᴏsᴇ ⁉️', callback_data='close_data')
-        ]]
-    else:
-        btn = [[
-            InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),
-            InlineKeyboardButton('💡 ꜱᴜᴘᴘᴏʀᴛ', url=SUPPORT_LINK)
-        ],[
-            InlineKeyboardButton('⁉️ ᴄʟᴏsᴇ ⁉️', callback_data='close_data')
-        ]]
+    btn = [[
+        InlineKeyboardButton('⚡️ ᴜᴘᴅᴀᴛᴇs', url=UPDATES_LINK),
+        InlineKeyboardButton('💡 ꜱᴜᴘᴘᴏʀᴛ', url=SUPPORT_LINK)
+    ],[
+        InlineKeyboardButton('⁉️ ᴄʟᴏsᴇ ⁉️', callback_data='close_data')
+    ]]
     vp = await client.send_cached_media(
         chat_id=message.from_user.id,
         file_id=file_id,
@@ -230,25 +210,6 @@ async def start(client, message):
     )
 
 
-@Client.on_message(filters.command('link'))
-async def link(bot, message):
-    msg = message.reply_to_message
-    if not msg:
-        return await message.reply('Reply to media')
-    try:
-        media = getattr(msg, msg.media.value)
-        msg = await bot.send_cached_media(chat_id=BIN_CHANNEL, file_id=media.file_id)
-        watch = f"{URL}watch/{msg.id}"
-        download = f"{URL}download/{msg.id}"
-        btn=[[
-            InlineKeyboardButton("ᴡᴀᴛᴄʜ ᴏɴʟɪɴᴇ", url=watch),
-            InlineKeyboardButton("ꜰᴀsᴛ ᴅᴏᴡɴʟᴏᴀᴅ", url=download)
-        ],[
-            InlineKeyboardButton('❌ ᴄʟᴏsᴇ ❌', callback_data='close_data')
-        ]]
-        await message.reply('Here is your link', reply_markup=InlineKeyboardMarkup(btn))
-    except:
-        await message.reply('Unsupported file')
 
 @Client.on_message(filters.command('index_channels'))
 async def channels_info(bot, message):

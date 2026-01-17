@@ -2,7 +2,7 @@ class script(object):
 
     START_TXT = """<b>ʜᴇʏ {}, <i>{}</i>
     
-ɪ ᴀᴍ ᴘᴏᴡᴇʀғᴜʟ ᴀᴜᴛᴏ ғɪʟᴛᴇʀ ᴡɪᴛʜ ʟɪɴᴋ sʜᴏʀᴛᴇɴᴇʀ ʙᴏᴛ. ʏᴏᴜ ᴄᴀɴ ᴜꜱᴇ ᴀꜱ ᴀᴜᴛᴏ ғɪʟᴛᴇʀ ᴡɪᴛʜ ʟɪɴᴋ sʜᴏʀᴛᴇɴᴇʀ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ... ɪᴛ'ꜱ ᴇᴀꜱʏ ᴛᴏ ᴜꜱᴇ ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴀꜱ ᴀᴅᴍɪɴ ɪɴ ʏᴏᴜʀ ɢʀᴏᴜᴘ ɪ ᴡɪʟʟ ᴘʀᴏᴠɪᴅᴇ ᴛʜᴇʀᴇ ᴍᴏᴠɪᴇꜱ ᴡɪᴛʜ ʏᴏᴜʀ ʟɪɴᴋ ꜱʜᴏʀᴛᴇɴᴇʀ... ♻️</b>"""
+ɪ ᴀᴍ ᴘᴏᴡᴇʀғᴜʟ ꜱᴜʙᴛɪᴛʟᴇ ꜰɪɴᴅᴇʀ ʙᴏᴛ. ʏᴏᴜ ᴄᴀɴ ꜱᴇᴀʀᴄʜ ᴀɴʏ ꜱᴜʙᴛɪᴛʟᴇ ꜰɪʟᴇꜱ ɪɴ ᴍʏ ᴅᴀᴛᴀʙᴀꜱᴇ. ᴊᴜꜱᴛ ꜱᴇɴᴅ ᴛʜᴇ ᴍᴏᴠɪᴇ ɴᴀᴍᴇ ɪ ᴡɪʟʟ ᴘʀᴏᴠɪᴅᴇ ᴛʜᴇ ꜱᴜʙᴛɪᴛʟᴇꜱ! ♻️</b>"""
 
     MY_ABOUT_TXT = """★ Server: <a href=https://www.heroku.com>Heroku</a>
 ★ Database: <a href=https://www.mongodb.com>MongoDB</a>
@@ -62,10 +62,9 @@ I can't find the <b>{}</b> in my database! 🥲
 
     HELP_TXT = """👋 Hello {},
     
-I can filter movie and series you want
-Just type you want movie or series in my PM or adding me in to group
-And i have more feature for you
-Just try my commands"""
+ɪ ᴄᴀɴ ꜰɪɴᴅ ꜱᴜʙᴛɪᴛʟᴇꜱ ꜰᴏʀ ʏᴏᴜ 
+ᴊᴜꜱᴛ ᴛʏᴘᴇ ᴛʜᴇ ɴᴀᴍᴇ ᴏꜰ ᴛʜᴇ ᴍᴏᴠɪᴇ ᴏʀ ꜱᴇʀɪᴇꜱ ɪɴ ᴍʏ ᴘᴍ ᴏʀ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ.
+ɪ ʜᴀᴠᴇ ᴀ ʟᴀʀɢᴇ ᴅᴀᴛᴀʙᴀꜱᴇ ᴏꜰ ꜱᴜʙᴛɪᴛʟᴇ ꜰɪʟᴇꜱ."""
 
     ADMIN_COMMAND_TXT = """<b>Here is bot admin commands 👇
 
@@ -98,11 +97,11 @@ You can activate any premium plan and then you can get exclusive features.
 
 Basic premium features:
 Ad free experience
-Online watch and fast download
-No need joind channels
+Fastest response
+No need joined channels
 No need verify
-No shortlink
-Admins support
+Ad-free direct files
+Premium community access
 And more...
 
 Support: {}"""
