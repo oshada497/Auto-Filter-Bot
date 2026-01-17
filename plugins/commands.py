@@ -180,14 +180,8 @@ async def start(client, message):
                 reply_markup=InlineKeyboardMarkup(btn)
             )
             file_ids.append(msg.id)
-
-        buttons = [[InlineKeyboardButton('ɢᴇᴛ ғɪʟᴇs ᴀɢᴀɪɴ', callback_data=f"get_del_send_all_files#{grp_id}#{key}")]] 
-        await client.delete_messages(
-            chat_id=message.chat.id,
-            message_ids=file_ids + [total_files.id]
-        )
-        await vp.edit("Tʜᴇ ғɪʟᴇ ʜᴀs ʙᴇᴇɴ ɢᴏɴᴇ ! Cʟɪᴄᴋ ɢɪᴠᴇɴ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪᴛ ᴀɢᴀɪɴ.", reply_markup=InlineKeyboardMarkup(buttons))
         return
+
 
     type_, grp_id, file_id = mc.split("_", 2)
     files_ = await get_file_details(file_id)
@@ -234,12 +228,6 @@ async def start(client, message):
         protect_content=False,
         reply_markup=InlineKeyboardMarkup(btn)
     )
-    btns = [[
-        InlineKeyboardButton('ɢᴇᴛ ғɪʟᴇ ᴀɢᴀɪɴ', callback_data=f"get_del_file#{grp_id}#{file_id}")
-    ]]
-    # await msg.delete()
-    await vp.delete()
-    await vp.reply("Tʜᴇ ғɪʟᴇ ʜᴀs ʙᴇᴇɴ ɢᴏɴᴇ ! Cʟɪᴄᴋ ɢɪᴠᴇɴ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪᴛ ᴀɢᴀɪɴ.", reply_markup=InlineKeyboardMarkup(btns))
 
 
 @Client.on_message(filters.command('link'))
