@@ -31,7 +31,7 @@
 - [x] 𝐴𝑛𝑑 𝑀𝑜𝑟𝑒...
 
 ## Demo Bot
-* [Try this bot](https://t.me/HA_Auto_Filter_Test_Bot)
+* [Try this bot](https://t.me/sinhalasubsproject)
 * Here bot you can test features and more before deploy your own bot
 
 ## 𝐶𝑜𝑚𝑚𝑎𝑛𝑑𝑠
@@ -147,12 +147,12 @@ sudo docker logs Auto-Filter-Bot
 </details>
 
 ## Support
-* [![Support](https://img.shields.io/static/v1?label=Support&message=Group&color=critical)](https://t.me/HA_Bots_Support)
-* [![Updates](https://img.shields.io/static/v1?label=Updates&message=Channel&color=critical)](https://t.me/HA_Bots)
+* [![Support](https://img.shields.io/static/v1?label=Support&message=Group&color=critical)](https://t.me/sinhalasubsproject)
+* [![Updates](https://img.shields.io/static/v1?label=Updates&message=Channel&color=critical)](https://t.me/sinhalasubsproject)
 
 ## Credits 
-* [![EvaMaria](https://img.shields.io/static/v1?label=EvaMaria&message=Developers&color=critical)](https://t.me/TeamEvamaria)
-* [![Hansaka](https://img.shields.io/static/v1?label=Hansaka&message=TG&color=critical)](https://t.me/Hansaka_Anuhas)
+* [![EvaMaria](https://img.shields.io/static/v1?label=EvaMaria&message=Developers&color=critical)](https://t.me/sinhalasubsproject)
+* [![Hansaka](https://img.shields.io/static/v1?label=Hansaka&message=TG&color=critical)](https://t.me/sinhalasubsproject)
 
 ## Donate
 * If you feel like showing your appreciation for this project, then how about buying me a coffee.
@@ -165,8 +165,8 @@ sudo docker logs Auto-Filter-Bot
 * And to everyone who helped
 
 ## Note
-* Importing this repo instead of forking is strictly prohibited, Kindly fork and edit as your wish. Must Give Credits for [developer(s)](https://t.me/HA_Bots)
-* If you find any bugs or errors, [report](https://t.me/HA_Bots_Support) it
+* Importing this repo instead of forking is strictly prohibited, Kindly fork and edit as your wish. Must Give Credits for [developer(s)](https://t.me/sinhalasubsproject)
+* If you find any bugs or errors, [report](https://t.me/sinhalasubsproject) it
 
 ## Disclaimer
 [![GNU General Public License v3.0](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/agpl-3.0.en.html#header)  
