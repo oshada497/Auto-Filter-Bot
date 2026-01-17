@@ -341,31 +341,45 @@ class SubtitleScraper:
         """Run one complete scrape cycle for all sources"""
         logger.info("Starting scrape cycle...")
         
-        all_subtitles = []
+        subz_subs = []
+        zoom_subs = []
+        baiscope_subs = []
         
         # Scrape all sources
         try:
             subz_subs = await self.scrape_subz_lk()
-            all_subtitles.extend(subz_subs)
             logger.info(f"Found {len(subz_subs)} new subtitles from subz.lk")
         except Exception as e:
             logger.error(f"subz.lk scrape failed: {e}")
         
         try:
             zoom_subs = await self.scrape_zoom_lk()
-            all_subtitles.extend(zoom_subs)
             logger.info(f"Found {len(zoom_subs)} new subtitles from zoom.lk")
         except Exception as e:
             logger.error(f"zoom.lk scrape failed: {e}")
         
         try:
             baiscope_subs = await self.scrape_baiscope_lk()
-            all_subtitles.extend(baiscope_subs)
             logger.info(f"Found {len(baiscope_subs)} new subtitles from baiscope.lk")
         except Exception as e:
             logger.error(f"baiscope.lk scrape failed: {e}")
         
-        # Process found subtitles
+        # Fair distribution: take from each source in round-robin
+        all_subtitles = []
+        max_per_source = MAX_SUBS_PER_RUN // 3 + 1  # ~4 from each source
+        
+        # Take up to max_per_source from each site
+        for i in range(max_per_source):
+            if i < len(subz_subs):
+                all_subtitles.append(subz_subs[i])
+            if i < len(zoom_subs):
+                all_subtitles.append(zoom_subs[i])
+            if i < len(baiscope_subs):
+                all_subtitles.append(baiscope_subs[i])
+        
+        total_found = len(subz_subs) + len(zoom_subs) + len(baiscope_subs)
+        
+        # Process found subtitles (limit to MAX_SUBS_PER_RUN)
         processed = 0
         for sub in all_subtitles[:MAX_SUBS_PER_RUN]:
             try:
@@ -375,7 +389,7 @@ class SubtitleScraper:
             except Exception as e:
                 logger.error(f"Error processing subtitle: {e}")
         
-        logger.info(f"Scrape cycle complete. Processed {processed}/{len(all_subtitles)} subtitles")
+        logger.info(f"Scrape cycle complete. Processed {processed}/{total_found} subtitles")
         await self.close_session()
 
 

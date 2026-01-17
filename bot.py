@@ -72,7 +72,7 @@ class Bot(Client):
         try:
             from plugins.auto_scraper import start_auto_scraper
             asyncio.create_task(start_auto_scraper(self))
-            logger.info("Auto-scraper started for subz.lk, zoom.lk, biscope.lk")
+            logger.info("Auto-scraper started for subz.lk, zoom.lk, baiscope.lk")
         except Exception as e:
             logger.error(f"Failed to start auto-scraper: {e}")
         
