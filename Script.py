@@ -59,7 +59,9 @@ I can't find the <b>{}</b> in my database! 🥲
 
     FILE_CAPTION = """<b>{file_name}</b>
 
-<b>{file_caption}</b>"""
+<b>{file_caption}</b>
+
+Powered by @slbotdevs"""
 
     WELCOME_TEXT = """👋 Hello {mention}, Welcome to {title} group! 💞"""
 
