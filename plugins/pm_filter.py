@@ -27,6 +27,16 @@ async def pm_search(client, message):
         return await message.reply_text('PM search was disabled!')
     if not stg.get('AUTO_FILTER'):
         return await message.reply_text('Auto filter was disabled!')
+    
+    # Check force subscribe
+    btn = await is_subscribed(client, message)
+    if btn:
+        btn.append([InlineKeyboardButton("🔁 Try Again 🔁", callback_data="close_data")])
+        return await message.reply(
+            "👋 Please join my updates channel to use this bot!\n\nඅපගේ channel එකට join වන්න! 🙏",
+            reply_markup=InlineKeyboardMarkup(btn)
+        )
+    
     s = await message.reply(f"<b><i>🔍 `{message.text}` සබ් එක හොයන ගමන්...</i></b>", quote=True)
     await auto_filter(client, message, s)
 

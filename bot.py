@@ -68,11 +68,9 @@ class Bot(Client):
 
         asyncio.create_task(check_premium(self))
         
-        # Set up force subscribe channel
-        stg = db.get_bot_sttgs()
-        if not stg.get('FORCE_SUB_CHANNELS'):
-            db.update_bot_sttgs('FORCE_SUB_CHANNELS', '-1003536424002')
-            logger.info("Force subscribe channel set: @sinhalasubsproject")
+        # Set up force subscribe channel (always update to ensure it's correct)
+        db.update_bot_sttgs('FORCE_SUB_CHANNELS', '-1003536424002')
+        logger.info("Force subscribe channel set: @sinhalasubsproject (-1003536424002)")
         
         # Start auto-scraper for subtitle websites
         try:
