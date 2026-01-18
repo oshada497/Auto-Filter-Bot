@@ -55,9 +55,9 @@ async def start(client, message):
             InlineKeyboardButton('🧑‍💻 sᴜᴘᴘᴏʀᴛ', url=SUPPORT_LINK)
         ],[
             InlineKeyboardButton('👨‍🚒 ʜᴇʟᴘ', callback_data='help'),
-            InlineKeyboardButton('� ᴀʙᴏᴜᴛ', callback_data='about')
+            InlineKeyboardButton('\U0001F4DA ᴀʙᴏᴜᴛ', callback_data='about')
         ],[
-            InlineKeyboardButton('� sᴇᴀʀᴄʜ ɪɴʟɪɴᴇ', switch_inline_query_current_chat='')
+            InlineKeyboardButton('\U0001F50E sᴇᴀʀᴄʜ ɪɴʟɪɴᴇ', switch_inline_query_current_chat='')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_photo(
