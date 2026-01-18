@@ -513,14 +513,34 @@ def remove_urls(text):
     """Remove URLs from text while keeping all other characters including Sinhala"""
     if not text:
         return text
-    # Remove URLs (http, https, www, t.me links)
-    cleaned = re.sub(r'https?://\S+|www\.\S+|t\.me/\S+', '', str(text))
-    # Remove "Source:" and "Link:" labels if they're now empty
-    cleaned = re.sub(r'Source:\s*\n?', '', cleaned)
-    cleaned = re.sub(r'Link:\s*\n?', '', cleaned)
-    # Clean up multiple newlines and spaces
+    
+    cleaned = str(text)
+    
+    # Remove full URLs (http, https, www, t.me links)
+    cleaned = re.sub(r'https?://\S+', '', cleaned)
+    cleaned = re.sub(r'www\.\S+', '', cleaned)
+    cleaned = re.sub(r't\.me/\S+', '', cleaned)
+    
+    # Remove partial URLs from known subtitle sites (zoom.lk, subz.lk, baiscope.lk)
+    cleaned = re.sub(r'zoom\.?lk[/\S]*', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'subz\.?lk[/\S]*', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'baiscope\.?lk[/\S]*', '', cleaned, flags=re.IGNORECASE)
+    
+    # Remove URL-encoded strings (like %e0%b7%83%e0%b7%92...)
+    cleaned = re.sub(r'%[0-9a-fA-F]{2}[%0-9a-fA-F/-]*', '', cleaned)
+    
+    # Remove "Source:", "Link:", "Zoom lk", etc. labels
+    cleaned = re.sub(r'Source:\s*', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'Link:\s*', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'Zoom\s*lk\s*', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'Subz\s*lk\s*', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'Baiscope\s*lk\s*', '', cleaned, flags=re.IGNORECASE)
+    
+    # Clean up multiple newlines, spaces, and trailing slashes
     cleaned = re.sub(r'\n\s*\n', '\n', cleaned)
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    cleaned = re.sub(r'/+$', '', cleaned).strip()
+    
     return cleaned if cleaned else text
     
 async def get_shortlink(url, api, link):
