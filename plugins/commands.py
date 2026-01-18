@@ -257,23 +257,15 @@ async def get_grp_stg(group_id):
     btn = [[
         InlineKeyboardButton('Edit IMDb template', callback_data=f'imdb_setgs#{group_id}')
     ],[
-        InlineKeyboardButton('Edit Shortlink', callback_data=f'shortlink_setgs#{group_id}')
-    ],[
         InlineKeyboardButton('Edit File Caption', callback_data=f'caption_setgs#{group_id}')
     ],[
         InlineKeyboardButton('Edit Welcome', callback_data=f'welcome_setgs#{group_id}')
-    ],[
-        InlineKeyboardButton('Edit tutorial link', callback_data=f'tutorial_setgs#{group_id}')
     ],[
         InlineKeyboardButton(f'IMDb Poster {"✅" if settings["imdb"] else "❌"}', callback_data=f'bool_setgs#imdb#{settings["imdb"]}#{group_id}')
     ],[
         InlineKeyboardButton(f'Spelling Check {"✅" if settings["spell_check"] else "❌"}', callback_data=f'bool_setgs#spell_check#{settings["spell_check"]}#{group_id}')
     ],[
-        InlineKeyboardButton(f"Auto Delete - {get_readable_time(DELETE_TIME)}" if settings["auto_delete"] else "Auto Delete ❌", callback_data=f'bool_setgs#auto_delete#{settings["auto_delete"]}#{group_id}')
-    ],[
         InlineKeyboardButton(f'Welcome {"✅" if settings["welcome"] else "❌"}', callback_data=f'bool_setgs#welcome#{settings["welcome"]}#{group_id}')
-    ],[
-        InlineKeyboardButton(f'Shortlink {"✅" if settings["shortlink"] else "❌"}', callback_data=f'bool_setgs#shortlink#{settings["shortlink"]}#{group_id}')
     ],[
         InlineKeyboardButton(f"Result Page - Link" if settings["links"] else "Result Page - Button", callback_data=f'bool_setgs#links#{settings["links"]}#{group_id}')
     ]]

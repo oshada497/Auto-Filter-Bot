@@ -25,7 +25,7 @@ class Database:
         'caption': FILE_CAPTION,
         'url': SHORTLINK_URL,
         'api': SHORTLINK_API,
-        'shortlink': SHORTLINK,
+        'shortlink': False,
         'tutorial': TUTORIAL,
         'links': LINK_MODE
     }
