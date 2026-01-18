@@ -40,7 +40,6 @@
 • /index_channels - to check how many index channel id added.
 • /stats - to get bot status.
 • /ping - view bot's ping (latency)
-• /img_2_link - upload image to uguu.se and get link
 • /settings - to change group settings as your wish.
 • /delete - to delete files using query.
 • /delete_all - to delete all indexed file.

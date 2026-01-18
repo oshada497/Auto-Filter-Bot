@@ -1,5 +1,5 @@
 from hydrogram.errors import UserNotParticipant, FloodWait
-from info import LONG_IMDB_DESCRIPTION, ADMINS, IS_PREMIUM, TIME_ZONE
+from info import LONG_IMDB_DESCRIPTION, ADMINS, IS_PREMIUM, TIME_ZONE, TMDB_API_KEY
 from imdb import Cinemagoer
 import asyncio
 from hydrogram.types import InlineKeyboardButton
@@ -9,6 +9,7 @@ from datetime import datetime
 from database.users_chats_db import db
 from shortzy import Shortzy
 import requests, pytz
+import aiohttp
 
 imdb = Cinemagoer() 
 
@@ -71,7 +72,171 @@ def upload_image(file_path):
         return None
 
 
-async def get_poster(query, bulk=False, id=False, file=None):
+async def get_poster_tmdb(query, file=None):
+    """Get movie/TV info from TMDB API"""
+    if not TMDB_API_KEY:
+        return None
+    
+    query = (query.strip()).lower()
+    title = query
+    year = re.findall(r'[1-2]\d{3}$', query, re.IGNORECASE)
+    if year:
+        year = year[0]
+        title = (query.replace(year, "")).strip()
+    elif file is not None:
+        year_match = re.findall(r'[1-2]\d{3}', file, re.IGNORECASE)
+        if year_match:
+            year = year_match[0]
+        else:
+            year = None
+    else:
+        year = None
+    
+    base_url = "https://api.themoviedb.org/3"
+    
+    async with aiohttp.ClientSession() as session:
+        # Search for movie/TV show
+        search_url = f"{base_url}/search/multi"
+        params = {
+            'api_key': TMDB_API_KEY,
+            'query': title,
+            'include_adult': 'false'
+        }
+        if year:
+            params['year'] = year
+        
+        try:
+            async with session.get(search_url, params=params, timeout=10) as resp:
+                if resp.status != 200:
+                    print(f"TMDB search failed with status: {resp.status}")
+                    return None
+                data = await resp.json()
+        except Exception as e:
+            print(f"TMDB search error: {e}")
+            return None
+        
+        results = data.get('results', [])
+        if not results:
+            print(f"TMDB search returned no results for: {title}")
+            return None
+        
+        # Filter to movies and TV shows only
+        filtered = [r for r in results if r.get('media_type') in ['movie', 'tv']]
+        if not filtered:
+            filtered = results
+        
+        # Get the best match
+        item = filtered[0]
+        media_type = item.get('media_type', 'movie')
+        item_id = item.get('id')
+        
+        # Get detailed info
+        detail_url = f"{base_url}/{media_type}/{item_id}"
+        params = {
+            'api_key': TMDB_API_KEY,
+            'append_to_response': 'credits'
+        }
+        
+        try:
+            async with session.get(detail_url, params=params, timeout=10) as resp:
+                if resp.status != 200:
+                    print(f"TMDB detail failed with status: {resp.status}")
+                    return None
+                details = await resp.json()
+        except Exception as e:
+            print(f"TMDB detail error: {e}")
+            return None
+        
+        # Extract poster URL
+        poster_path = details.get('poster_path')
+        poster = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
+        
+        # Extract cast
+        credits = details.get('credits', {})
+        cast = credits.get('cast', [])[:5]
+        cast_names = [c.get('name') for c in cast if c.get('name')]
+        
+        # Extract crew
+        crew = credits.get('crew', [])
+        directors = [c.get('name') for c in crew if c.get('job') == 'Director']
+        writers = [c.get('name') for c in crew if c.get('department') == 'Writing'][:3]
+        producers = [c.get('name') for c in crew if c.get('job') == 'Producer'][:3]
+        composers = [c.get('name') for c in crew if c.get('job') == 'Original Music Composer'][:2]
+        cinematographers = [c.get('name') for c in crew if c.get('job') == 'Director of Photography'][:2]
+        
+        # Get title based on media type
+        title = details.get('title') or details.get('name') or 'N/A'
+        original_title = details.get('original_title') or details.get('original_name') or title
+        
+        # Get release date
+        release_date = details.get('release_date') or details.get('first_air_date') or 'N/A'
+        year_val = release_date[:4] if release_date and release_date != 'N/A' else 'N/A'
+        
+        # Get runtime
+        runtime = details.get('runtime')
+        if not runtime and media_type == 'tv':
+            episode_runtime = details.get('episode_run_time', [])
+            runtime = episode_runtime[0] if episode_runtime else None
+        
+        # Get genres
+        genres = [g.get('name') for g in details.get('genres', [])]
+        
+        # Get languages
+        languages = [l.get('english_name') or l.get('name') for l in details.get('spoken_languages', [])]
+        
+        # Get countries
+        countries = [c.get('name') for c in details.get('production_countries', [])]
+        
+        # Get plot
+        plot = details.get('overview', 'N/A')
+        if plot and len(plot) > 800:
+            plot = plot[:800] + "..."
+        
+        # Get rating
+        rating = details.get('vote_average')
+        rating_str = f"{rating:.1f}" if rating else 'N/A'
+        
+        # Get number of seasons for TV shows
+        seasons = details.get('number_of_seasons') if media_type == 'tv' else None
+        
+        tmdb_id = details.get('id')
+        url = f"https://www.themoviedb.org/{media_type}/{tmdb_id}"
+        
+        print(f"TMDB found: {title}, poster: {poster[:50] if poster else 'None'}...")
+        
+        return {
+            'title': title,
+            'votes': details.get('vote_count', 'N/A'),
+            'aka': original_title if original_title != title else 'N/A',
+            'seasons': seasons,
+            'box_office': details.get('revenue', 'N/A') if details.get('revenue') else 'N/A',
+            'localized_title': title,
+            'kind': 'tv series' if media_type == 'tv' else 'movie',
+            'imdb_id': f"tmdb{tmdb_id}",
+            'cast': list_to_str(cast_names),
+            'runtime': str(runtime) if runtime else 'N/A',
+            'countries': list_to_str(countries),
+            'certificates': 'N/A',
+            'languages': list_to_str(languages),
+            'director': list_to_str(directors),
+            'writer': list_to_str(writers),
+            'producer': list_to_str(producers),
+            'composer': list_to_str(composers),
+            'cinematographer': list_to_str(cinematographers),
+            'music_team': 'N/A',
+            'distributors': 'N/A',
+            'release_date': release_date,
+            'year': year_val,
+            'genres': list_to_str(genres),
+            'poster': poster,
+            'plot': plot,
+            'rating': rating_str,
+            'url': url
+        }
+
+
+async def get_poster_imdb(query, bulk=False, id=False, file=None):
+    """Get movie/TV info from IMDB (original implementation)"""
     import asyncio
     from concurrent.futures import ThreadPoolExecutor
     
@@ -172,6 +337,19 @@ async def get_poster(query, bulk=False, id=False, file=None):
         'rating': str(movie.get("rating")),
         'url':f'https://www.imdb.com/title/tt{movieid}'
     }
+
+
+async def get_poster(query, bulk=False, id=False, file=None):
+    """Get movie/TV poster - uses TMDB if API key is set, otherwise falls back to IMDB"""
+    # Try TMDB first if API key is configured
+    if TMDB_API_KEY and not bulk and not id:
+        result = await get_poster_tmdb(query, file=file)
+        if result:
+            return result
+        print("TMDB failed, falling back to IMDB...")
+    
+    # Fall back to IMDB
+    return await get_poster_imdb(query, bulk=bulk, id=id, file=file)
 
 async def is_check_admin(bot, chat_id, user_id):
     try:

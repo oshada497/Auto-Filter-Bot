@@ -344,26 +344,6 @@ async def delete_file(bot, message):
  
 
 
-@Client.on_message(filters.command('img_2_link'))
-async def img_2_link(bot, message):
-    reply_to_message = message.reply_to_message
-    if not reply_to_message:
-        return await message.reply('Reply to any photo')
-    file = reply_to_message.photo
-    if file is None:
-        return await message.reply('Invalid media.')
-    text = await message.reply_text(text="ᴘʀᴏᴄᴇssɪɴɢ....")   
-    path = await reply_to_message.download()  
-    response = upload_image(path)
-    if not response:
-         await text.edit_text(text="Upload failed!")
-         return    
-    try:
-        os.remove(path)
-    except:
-        pass
-    await text.edit_text(f"<b>❤️ Your link ready 👇\n\n{response}</b>", disable_web_page_preview=True)
-
 @Client.on_message(filters.command('ping'))
 async def ping(client, message):
     start_time = monotonic()
@@ -371,32 +351,6 @@ async def ping(client, message):
     end_time = monotonic()
     await msg.edit(f'{round((end_time - start_time) * 1000)} ms')
     
-
-@Client.on_message(filters.command('myplan') & filters.private)
-async def myplan(client, message):
-    if not IS_PREMIUM:
-        return await message.reply('Premium feature was disabled by admin')
-    mp = db.get_plan(message.from_user.id)
-    if not await is_premium(message.from_user.id, client):
-        btn = [[
-            InlineKeyboardButton('Activate Trial', callback_data='activate_trial'),
-            InlineKeyboardButton('Activate Plan', callback_data='activate_plan')
-        ]]
-        return await message.reply('You dont have any premium plan, please use /plan to activate plan', reply_markup=InlineKeyboardMarkup(btn))
-    await message.reply(f"You activated {mp['plan']} plan\nExpire: {mp['expire'].strftime('%Y.%m.%d %H:%M:%S')}")
-
-
-@Client.on_message(filters.command('plan') & filters.private)
-async def plan(client, message):
-    if not IS_PREMIUM:
-        return await message.reply('Premium feature was disabled by admin')
-    btn = [[
-        InlineKeyboardButton('Activate Trial', callback_data='activate_trial')
-    ],[
-        InlineKeyboardButton('Activate Plan', callback_data='activate_plan')
-    ]]
-    await message.reply(script.PLAN_TXT.format(PRE_DAY_AMOUNT, RECEIPT_SEND_USERNAME), reply_markup=InlineKeyboardMarkup(btn))
-
 
 @Client.on_message(filters.command('add_prm') & filters.user(ADMINS))
 async def add_prm(bot, message):

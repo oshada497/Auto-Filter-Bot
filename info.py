@@ -118,6 +118,10 @@ IMDB = is_enabled('IMDB', True)
 SPELL_CHECK = is_enabled("SPELL_CHECK", True)
 SHORTLINK = is_enabled('SHORTLINK', False)
 
+# TMDB API (optional - if set, uses TMDB instead of IMDB for movie info and posters)
+# Get free API key from https://www.themoviedb.org/settings/api
+TMDB_API_KEY = environ.get('TMDB_API_KEY', 'da06564497bf45a3315c8154022e4552')
+
 # for stream
 IS_STREAM = is_enabled('IS_STREAM', False)
 BIN_CHANNEL = environ.get("BIN_CHANNEL", "")
