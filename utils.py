@@ -32,8 +32,8 @@ class temp(object):
 async def is_subscribed(bot, query):
     btn = []
     try:
-        if query.from_user.id in ADMINS:
-            return btn
+        # if query.from_user.id in ADMINS:
+        #     return btn
         if IS_PREMIUM and await is_premium(query.from_user.id, bot):
             return btn
     except:
