@@ -150,21 +150,34 @@ class SubtitleScraper:
                 for link in soup.find_all('a', href=True):
                     href = link.get('href', '')
                     
-                    # Filter subtitle pages
-                    if 'zoom.lk/' in href and ('sinhala-subtitle' in href.lower() or 'subtitle' in href.lower()):
+                    # Skip if not zoom.lk
+                    if 'zoom.lk/' not in href:
+                        continue
+                    
+                    # Skip category, page, tag pages
+                    if any(skip in href for skip in ['/category/', '/page/', '/tag/', '/#']):
+                        continue
+                    
+                    # Look for individual subtitle pages (they end with -sinhala-subtitle/)
+                    if re.search(r'-sinhala-subtitle/?$', href.lower()) or re.search(r'-subtitle/?$', href.lower()):
                         url = href if href.startswith('http') else f'https://zoom.lk{href}'
                         
                         # Get title from link text
                         title = link.get_text(strip=True)
-                        if not title or len(title) < 3:
+                        if not title or len(title) < 5:
+                            continue
+                        
+                        # Skip navigation links
+                        if any(skip in title.lower() for skip in ['more', 'see all', 'home', 'menu']):
                             continue
                         
                         if url and not self.is_processed(url):
                             subtitles.append({
                                 'url': url,
-                                'title': title[:100],
+                                'title': title[:150],
                                 'source': 'zoom.lk'
                             })
+                            logger.info(f"[zoom.lk] Found: {title[:50]}...")
                 
                 # Remove duplicates
                 seen = set()
@@ -174,6 +187,7 @@ class SubtitleScraper:
                         seen.add(sub['url'])
                         unique_subtitles.append(sub)
                 
+                logger.info(f"[zoom.lk] Total unique subtitles found: {len(unique_subtitles)}")
                 return unique_subtitles[:MAX_SUBS_PER_RUN]
                         
         except Exception as e:
@@ -200,29 +214,34 @@ class SubtitleScraper:
                 for link in soup.find_all('a', href=True):
                     href = link.get('href', '')
                     
-                    # Filter subtitle pages - baiscope uses "sinhala-subtitles" in URL
-                    if 'baiscope.lk/' in href and ('sinhala-subtitle' in href.lower() or 'subtitles' in href.lower()):
+                    # Skip if not baiscope.lk
+                    if 'baiscope.lk/' not in href:
+                        continue
+                    
+                    # Skip category, collection, chart pages
+                    if any(skip in href for skip in ['/category/', '/movie-collection/', '/tv-chart/', '/#']):
+                        continue
+                    
+                    # Look for individual subtitle pages (they end with -sinhala-subtitles/ or -with-sinhala-subtitles/)
+                    if re.search(r'-sinhala-subtitles?/?$', href.lower()) or re.search(r'-with-sinhala-subtitles/?$', href.lower()):
                         url = href if href.startswith('http') else f'https://www.baiscope.lk{href}'
-                        
-                        # Skip category pages
-                        if '/category/' in url:
-                            continue
                         
                         # Get title from link text
                         title = link.get_text(strip=True)
-                        if not title or len(title) < 3:
+                        if not title or len(title) < 5:
                             continue
                         
                         # Skip navigation links
-                        if 'ලබාගන්න' in title or 'සියලුම' in title:
+                        if any(skip in title for skip in ['ලබාගන්න', 'සියලුම', 'Home', 'MENU']):
                             continue
                         
                         if url and not self.is_processed(url):
                             subtitles.append({
                                 'url': url,
-                                'title': title[:100],
+                                'title': title[:150],
                                 'source': 'baiscope.lk'
                             })
+                            logger.info(f"[baiscope.lk] Found: {title[:50]}...")
                 
                 # Remove duplicates
                 seen = set()
@@ -232,6 +251,7 @@ class SubtitleScraper:
                         seen.add(sub['url'])
                         unique_subtitles.append(sub)
                 
+                logger.info(f"[baiscope.lk] Total unique subtitles found: {len(unique_subtitles)}")
                 return unique_subtitles[:MAX_SUBS_PER_RUN]
                         
         except Exception as e:
