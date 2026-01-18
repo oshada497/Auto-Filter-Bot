@@ -482,6 +482,20 @@ def clean_ascii(text):
     # Clean up multiple spaces and trim
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     return cleaned if cleaned else text
+
+def remove_urls(text):
+    """Remove URLs from text while keeping all other characters including Sinhala"""
+    if not text:
+        return text
+    # Remove URLs (http, https, www, t.me links)
+    cleaned = re.sub(r'https?://\S+|www\.\S+|t\.me/\S+', '', str(text))
+    # Remove "Source:" and "Link:" labels if they're now empty
+    cleaned = re.sub(r'Source:\s*\n?', '', cleaned)
+    cleaned = re.sub(r'Link:\s*\n?', '', cleaned)
+    # Clean up multiple newlines and spaces
+    cleaned = re.sub(r'\n\s*\n', '\n', cleaned)
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned if cleaned else text
     
 async def get_shortlink(url, api, link):
     shortzy = Shortzy(api_key=api, base_site=url)

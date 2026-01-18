@@ -1,7 +1,7 @@
 from hydrogram import Client
 from hydrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
 from database.ia_filterdb import get_search_results
-from utils import get_size, temp, get_verify_status, is_subscribed, is_premium, clean_ascii
+from utils import get_size, temp, get_verify_status, is_subscribed, is_premium, clean_ascii, remove_urls
 from info import CACHE_TIME, SUPPORT_LINK, UPDATES_LINK, FILE_CAPTION, IS_VERIFY
 
 cache_time = CACHE_TIME
@@ -48,7 +48,7 @@ async def inline_search(bot, query):
         f_caption=FILE_CAPTION.format(
             file_name=clean_ascii(file['file_name']),
             file_size=get_size(file['file_size']),
-            caption=clean_ascii(file['caption']) if file['caption'] else ''
+            file_caption=remove_urls(file['caption']) if file['caption'] else ''
         )
         results.append(
             InlineQueryResultCachedDocument(
