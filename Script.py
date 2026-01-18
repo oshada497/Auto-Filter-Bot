@@ -16,7 +16,6 @@ class script(object):
 ★ Country: Sri Lanka 🇱🇰"""
 
     STATUS_TXT = """👤 Total Users: <code>{}</code>
-😎 Premium Users: <code>{}</code>
 👥 Total Chats: <code>{}</code>
 🗳 Data database used: <code>{}</code>
 

@@ -32,7 +32,9 @@ class temp(object):
 async def is_subscribed(bot, query):
     btn = []
     try:
-        if await is_premium(query.from_user.id, bot):
+        if query.from_user.id in ADMINS:
+            return btn
+        if IS_PREMIUM and await is_premium(query.from_user.id, bot):
             return btn
     except:
         pass
@@ -402,8 +404,7 @@ async def update_verify_status(user_id, verify_token="", is_verified=False, link
 
     
 async def is_premium(user_id, bot):
-    if not IS_PREMIUM:
-        return True
+    return False
     if user_id in ADMINS:
         return True
     mp = db.get_plan(user_id)

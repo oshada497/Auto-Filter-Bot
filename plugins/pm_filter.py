@@ -140,7 +140,7 @@ async def next_page(bot, query):
         ]
             for file in files
         ]
-    if settings['shortlink'] and not await is_premium(query.from_user.id, bot):
+    if settings['shortlink']:
         btn.insert(0,
             [InlineKeyboardButton("♻️ sᴇɴᴅ ᴀʟʟ ♻️", url=await get_shortlink(settings['url'], settings['api'], f'https://t.me/{temp.U_NAME}?start=all_{query.message.chat.id}_{key}'))]
         )
@@ -229,15 +229,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     elif query.data.startswith("get_del_file"):
         ident, group_id, file_id = query.data.split("#")
-        if not await is_premium(query.from_user.id, client):
-            return await query.answer(f"Only for premium users, use /plan for details", show_alert=True)
         await query.answer(url=f"https://t.me/{temp.U_NAME}?start=file_{group_id}_{file_id}")
         await query.message.delete()
 
     elif query.data.startswith("get_del_send_all_files"):
         ident, group_id, key = query.data.split("#")
-        if not await is_premium(query.from_user.id, client):
-            return await query.answer(f"Only for premium users, use /plan for details", show_alert=True)
         await query.answer(url=f"https://t.me/{temp.U_NAME}?start=all_{group_id}_{key}")
         await query.message.delete()
         
@@ -263,47 +259,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
     elif query.data == "instructions":
         await query.answer("Subtitle request format.\nExample:\nAvengers Endgame\nor\nAvengers Endgame 2019\n\nJust send the movie name and I will find the subtitles for you.", show_alert=True)
 
-    elif query.data == 'activate_trial':
-        mp = db.get_plan(query.from_user.id)
-        if mp['trial']:
-            return await query.message.edit('You already used trial, use /plan to activate plan')
-        ex = datetime.now() + timedelta(hours=1)
-        mp['expire'] = ex
-        mp['trial'] = True
-        mp['plan'] = '1 hour'
-        mp['premium'] = True
-        db.update_plan(query.from_user.id, mp)
-        await query.message.edit(f"Congratulations! Your activated trial for 1 hour\nExpire: {ex.strftime('%Y.%m.%d %H:%M:%S')}")
 
-    elif query.data == 'activate_plan':
-        q = await query.message.edit('How many days you need premium plan?\nSend days as number')
-        msg = await client.listen(chat_id=query.message.chat.id, user_id=query.from_user.id)
-        try:
-            d = int(msg.text)
-        except:
-            await q.delete()
-            return await query.message.reply('Invalid number\nIf you want 7 days then send 7 only')
-        transaction_note = f'{d} days premium plan for {query.from_user.id}'
-        amount = d * PRE_DAY_AMOUNT
-        upi_uri = f"upi://pay?pa={UPI_ID}&pn={UPI_NAME}&am={amount}&cu=INR&tn={transaction_note}"
-        qr = qrcode.make(upi_uri)
-        p = f"upi_qr_{query.from_user.id}.png"
-        qr.save(p)
-        await q.delete()
-        await query.message.reply_photo(p, caption=f"{d} days premium plan amount is {amount} INR\nScan this QR in your UPI support platform and pay that amount (This is dynamic QR)\n\nSend your receipt as photo in here (timeout in 10 mins)\n\nSupport: {RECEIPT_SEND_USERNAME}")
-        os.remove(p)
-        try:
-            msg = await client.listen(chat_id=query.message.chat.id, user_id=query.from_user.id, timeout=600)
-        except ListenerTimeout:
-            await q.delete()
-            return await query.message.reply(f'Your time is over, send your receipt to: {RECEIPT_SEND_USERNAME}')
-        if msg.photo:
-            await q.delete()
-            await query.message.reply(f'Your receipt was sent, wait some time\nSupport: {RECEIPT_SEND_USERNAME}')
-            await client.send_photo(RECEIPT_SEND_USERNAME, msg.photo.file_id, transaction_note)
-        else:
-            await q.delete()
-            await query.message.reply(f"Not valid photo, send your receipt to: {RECEIPT_SEND_USERNAME}")
 
 
 
@@ -341,7 +297,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         files = db_count_documents()
         users = await db.total_users_count()
         chats = await db.total_chat_count()
-        prm = db.get_premium_count()
+        chats = await db.total_chat_count()
         used_files_db_size = get_size(await db.get_files_db_size())
         used_data_db_size = get_size(await db.get_data_db_size())
 
@@ -356,7 +312,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             InlineKeyboardButton('« ʙᴀᴄᴋ', callback_data='about')
         ]]
         await query.edit_message_media(
-            InputMediaPhoto(random.choice(PICS), caption=script.STATUS_TXT.format(users, prm, chats, used_data_db_size, files, used_files_db_size, secnd_files, secnd_files_db_used_size, uptime)),
+            InputMediaPhoto(random.choice(PICS), caption=script.STATUS_TXT.format(users, chats, used_data_db_size, files, used_files_db_size, secnd_files, secnd_files_db_used_size, uptime)),
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     
@@ -788,7 +744,7 @@ async def auto_filter(client, msg, s, spoll=False):
             for file in files
         ]   
     if offset != "":
-        if settings['shortlink'] and not await is_premium(message.from_user.id, client):
+        if settings['shortlink']:
             btn.insert(0,
                 [InlineKeyboardButton("♻️ sᴇɴᴅ ᴀʟʟ ♻️", url=await get_shortlink(settings['url'], settings['api'], f'https://t.me/{temp.U_NAME}?start=all_{message.chat.id}_{key}'))]
             )

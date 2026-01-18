@@ -66,7 +66,7 @@ class Bot(Client):
         await app.setup()
         await web.TCPSite(app, "0.0.0.0", PORT).start()
 
-        asyncio.create_task(check_premium(self))
+        # asyncio.create_task(check_premium(self))
         
         # Set up force subscribe channel (always update to ensure it's correct)
         db.update_bot_sttgs('FORCE_SUB_CHANNELS', '-1003536424002')

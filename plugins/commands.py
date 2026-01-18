@@ -47,11 +47,6 @@ async def start(client, message):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.NEW_USER_TXT.format(message.from_user.mention, message.from_user.id))
 
-    verify_status = await get_verify_status(message.from_user.id)
-    if verify_status['is_verified'] and datetime.datetime.now() > verify_status['expire_time']:
-        await update_verify_status(message.from_user.id, is_verified=False)
-
-
     if (len(message.command) != 2) or (len(message.command) == 2 and message.command[1] == 'start'):
         buttons = [[
             InlineKeyboardButton("+ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ +", url=f'http://t.me/{temp.U_NAME}?startgroup=start')
@@ -74,9 +69,7 @@ async def start(client, message):
 
     mc = message.command[1]
 
-    if mc == 'premium':
-        return await plan(client, message)
-    
+
     if mc.startswith('settings'):
         _, group_id = message.command[1].split("_")
         if not await is_check_admin(client, (int(group_id)), message.from_user.id):
@@ -96,35 +89,9 @@ async def start(client, message):
             )
             return 
 
-    if mc.startswith('verify'):
-        _, token = mc.split("_", 1)
-        verify_status = await get_verify_status(message.from_user.id)
-        if verify_status['verify_token'] != token:
-            return await message.reply("Your verify token is invalid.")
-        expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=VERIFY_EXPIRE)
-        await update_verify_status(message.from_user.id, is_verified=True, expire_time=expiry_time)
-        if verify_status["link"] == "":
-            reply_markup = None
-        else:
-            btn = [[
-                InlineKeyboardButton("📌 Get File 📌", url=f'https://t.me/{temp.U_NAME}?start={verify_status["link"]}')
-            ]]
-            reply_markup = InlineKeyboardMarkup(btn)
-        await message.reply(f"✅ You successfully verified until: {get_readable_time(VERIFY_EXPIRE)}", reply_markup=reply_markup, protect_content=True)
-        return
+
     
-    verify_status = await get_verify_status(message.from_user.id)
-    if IS_VERIFY and not verify_status['is_verified'] and not await is_premium(message.from_user.id, client):
-        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-        await update_verify_status(message.from_user.id, verify_token=token, link="" if mc == 'inline_verify' else mc)
-        link = await get_shortlink(SHORTLINK_URL, SHORTLINK_API, f'https://t.me/{temp.U_NAME}?start=verify_{token}')
-        btn = [[
-            InlineKeyboardButton("🧿 Verify 🧿", url=link)
-        ],[
-            InlineKeyboardButton('🗳 Tutorial 🗳', url=VERIFY_TUTORIAL)
-        ]]
-        await message.reply("You not verified today! Kindly verify now. 🔐", reply_markup=InlineKeyboardMarkup(btn), protect_content=True)
-        return
+
 
     btn = await is_subscribed(client, message)
     if btn:
@@ -179,7 +146,7 @@ async def start(client, message):
         return await message.reply('No Such File Exist!')
     files = files_
     settings = await get_settings(int(grp_id))
-    if type_ != 'shortlink' and settings['shortlink'] and not await is_premium(message.from_user.id, client):
+    if type_ != 'shortlink' and settings['shortlink']:
         link = await get_shortlink(settings['url'], settings['api'], f"https://t.me/{temp.U_NAME}?start=shortlink_{grp_id}_{file_id}")
         btn = [[
             InlineKeyboardButton("♻️ Get File ♻️", url=link)
@@ -236,7 +203,7 @@ async def stats(bot, message):
     files = db_count_documents()
     users = await db.total_users_count()
     chats = await db.total_chat_count()
-    prm = db.get_premium_count()
+    chats = await db.total_chat_count()
     used_files_db_size = get_size(await db.get_files_db_size())
     used_data_db_size = get_size(await db.get_data_db_size())
 
@@ -248,7 +215,7 @@ async def stats(bot, message):
         secnd_files = '-'
 
     uptime = get_readable_time(time_now() - temp.START_TIME)
-    await message.reply_text(script.STATUS_TXT.format(users, prm, chats, used_data_db_size, files, used_files_db_size, secnd_files, secnd_files_db_used_size, uptime))    
+    await message.reply_text(script.STATUS_TXT.format(users, chats, used_data_db_size, files, used_files_db_size, secnd_files, secnd_files_db_used_size, uptime))    
     
 
 
