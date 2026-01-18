@@ -327,8 +327,8 @@ class SubtitleScraper:
             logger.warning(f"Failed to download: {download_url}")
             return False
         
-        # Upload to channel with formatted caption
-        caption = f"{title} - Sinhala Subtitle (සිංහල උපසිරැසි)\n\nSource: {source}\nLink: {url}"
+        # Upload to channel with formatted caption (no URL to avoid encoded characters)
+        caption = f"{title} - Sinhala Subtitle (සිංහල උපසිරැසි)\n\nSource: {source}"
         success = await self.upload_to_channel(filepath, caption)
         
         if success:
