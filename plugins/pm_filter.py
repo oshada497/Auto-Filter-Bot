@@ -747,14 +747,9 @@ async def auto_filter(client, msg, s, spoll=False):
              InlineKeyboardButton(text="ɴᴇxᴛ ➡️", callback_data=f"next_{req}_{key}_{offset}")]
         )
     else:
-        if settings['shortlink'] and not await is_premium(message.from_user.id, client):
-            btn.insert(0,
-                [InlineKeyboardButton("♻️ sᴇɴᴅ ᴀʟʟ ♻️", url=await get_shortlink(settings['url'], settings['api'], f'https://t.me/{temp.U_NAME}?start=all_{message.chat.id}_{key}'))]
-            )
-        else:
-            btn.insert(0,
-                [InlineKeyboardButton("♻️ sᴇɴᴅ ᴀʟʟ ♻️", callback_data=f"send_all#{key}#{req}")]
-            )
+        btn.insert(0,
+            [InlineKeyboardButton("♻️ sᴇɴᴅ ᴀʟʟ ♻️", callback_data=f"send_all#{key}#{req}")]
+        )
 
     imdb = None
     if settings["imdb"]:
