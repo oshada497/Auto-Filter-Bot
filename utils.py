@@ -7,7 +7,6 @@ from hydrogram import enums
 import re
 from datetime import datetime
 from database.users_chats_db import db
-from shortzy import Shortzy
 import requests, pytz
 import aiohttp
 
@@ -32,8 +31,8 @@ class temp(object):
 async def is_subscribed(bot, query):
     btn = []
     try:
-        # if query.from_user.id in ADMINS:
-        #     return btn
+        if query.from_user.id in ADMINS:
+            return btn
         if IS_PREMIUM and await is_premium(query.from_user.id, bot):
             return btn
     except:
@@ -544,10 +543,7 @@ def remove_urls(text):
     
     return cleaned if cleaned else text
     
-async def get_shortlink(url, api, link):
-    shortzy = Shortzy(api_key=api, base_site=url)
-    link = await shortzy.convert(link)
-    return link
+
 
 def get_readable_time(seconds):
     periods = [('d', 86400), ('h', 3600), ('m', 60), ('s', 1)]

@@ -2,7 +2,7 @@ hydrogram
 tgcrypto
 pymongo
 cinemagoer
-shortzy
+
 aiohttp
 aiofiles
 speedtest-cli
