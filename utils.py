@@ -31,29 +31,55 @@ class temp(object):
 
 async def is_subscribed(bot, query):
     btn = []
-    if await is_premium(query.from_user.id, bot):
-        return btn
+    try:
+        if await is_premium(query.from_user.id, bot):
+            return btn
+    except:
+        pass
+    
     stg = db.get_bot_sttgs()
     if not stg or not stg.get('FORCE_SUB_CHANNELS'):
         return btn
-    for id in stg.get('FORCE_SUB_CHANNELS').split(' '):
-        chat = await bot.get_chat(int(id))
+    
+    for channel_id in stg.get('FORCE_SUB_CHANNELS').split(' '):
         try:
-            await bot.get_chat_member(int(id), query.from_user.id)
+            channel_id = int(channel_id.strip())
+            chat = await bot.get_chat(channel_id)
+            member = await bot.get_chat_member(channel_id, query.from_user.id)
+            # Check if user is actually a member (not left/kicked/banned)
+            if member.status.name in ['LEFT', 'BANNED', 'RESTRICTED']:
+                btn.append(
+                    [InlineKeyboardButton(f'🔔 Join : {chat.title}', url=chat.invite_link or f'https://t.me/{chat.username}')]
+                )
         except UserNotParticipant:
-            btn.append(
-                [InlineKeyboardButton(f'Join : {chat.title}', url=chat.invite_link)]
-            )
+            try:
+                chat = await bot.get_chat(channel_id)
+                invite_link = chat.invite_link or f'https://t.me/{chat.username}'
+                btn.append(
+                    [InlineKeyboardButton(f'🔔 Join : {chat.title}', url=invite_link)]
+                )
+            except Exception as e:
+                print(f"Error getting chat {channel_id}: {e}")
+        except Exception as e:
+            print(f"Force sub check error for {channel_id}: {e}")
+    
+    # Request force sub (for channels with join requests)
     if stg and stg.get('REQUEST_FORCE_SUB_CHANNELS') and not db.find_join_req(query.from_user.id):
-        id = stg.get('REQUEST_FORCE_SUB_CHANNELS')
-        chat = await bot.get_chat(int(id))
         try:
-            await bot.get_chat_member(int(id), query.from_user.id)
+            req_id = int(stg.get('REQUEST_FORCE_SUB_CHANNELS'))
+            chat = await bot.get_chat(req_id)
+            await bot.get_chat_member(req_id, query.from_user.id)
         except UserNotParticipant:
-            url = await bot.create_chat_invite_link(int(id), creates_join_request=True)
-            btn.append(
-                [InlineKeyboardButton(f'Request : {chat.title}', url=url.invite_link)]
-            )
+            try:
+                url = await bot.create_chat_invite_link(req_id, creates_join_request=True)
+                btn.append(
+                    [InlineKeyboardButton(f'📩 Request : {chat.title}', url=url.invite_link)]
+                )
+            except Exception as e:
+                print(f"Error creating invite link: {e}")
+        except Exception as e:
+            print(f"Request force sub error: {e}")
+    
     return btn
 
 
