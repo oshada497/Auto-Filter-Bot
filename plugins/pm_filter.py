@@ -27,7 +27,7 @@ async def pm_search(client, message):
         return await message.reply_text('PM search was disabled!')
     if not stg.get('AUTO_FILTER'):
         return await message.reply_text('Auto filter was disabled!')
-    s = await message.reply(f"<b><i>⚠️ `{message.text}` searching...</i></b>", quote=True)
+    s = await message.reply(f"<b><i>🔍 `{message.text}` සබ් එක හොයන ගමන්...</i></b>", quote=True)
     await auto_filter(client, message, s)
 
             
@@ -81,7 +81,7 @@ async def group_search(client, message):
             await message.reply_text("Request sent!")
             return  
         else:
-            s = await message.reply(f"<b><i>⚠️ `{message.text}` searching...</i></b>")
+            s = await message.reply(f"<b><i>🔍 `{message.text}` සබ් එක හොයන ගමන්...</i></b>")
             await auto_filter(client, message, s)
     else:
         k = await message.reply_text('Auto Filter Off! ❌')
