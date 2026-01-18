@@ -13,8 +13,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Scraper configuration
-SCRAPE_INTERVAL = 3600  # Check every 1 hour (in seconds)
-MAX_SUBS_PER_RUN = 10   # Maximum subtitles to process per run
+SCRAPE_INTERVAL = 86400  # Check once a day (24 hours in seconds)
+MAX_SUBS_PER_RUN = 50    # Maximum subtitles to process per run (increased for daily)
 
 class SubtitleScraper:
     def __init__(self, bot: Client):
@@ -439,7 +439,7 @@ async def scrape_status(client: Client, message: Message):
     total_scraped = db.get_scraped_count()
     await message.reply(f"📊 **Scraper Status**\n\n"
                        f"📁 Total URLs processed: {total_scraped}\n"
-                       f"⏱ Scrape interval: {SCRAPE_INTERVAL // 60} minutes\n"
+                       f"⏱ Scrape interval: {SCRAPE_INTERVAL // 3600} hours (once a day)\n"
                        f"🔢 Max subs per run: {MAX_SUBS_PER_RUN}\n\n"
                        f"🌐 Sources:\n"
                        f"• subz.lk\n"
